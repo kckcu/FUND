@@ -1,0 +1,3 @@
+gcc 1.c -o app -fexec-charset=cp866
+./app 25 -h
+chcp 65001
