@@ -3,22 +3,36 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <sys/stat.h>
+
+
+//глубокая проверка, что оба файла разные
+bool is_same_file(const chaar* path1, const char* path2) {
+    struct stat stat1, stat2;
+
+    if (stat(path1, &stat1) == 0 && stat(path2, &stat2) == 0) {
+        if (stat1.st_dev == stat2.st_dev && stat1.st_ino == stat2.st_ino) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 char* generate_output_filename(const char* filepath) {
-
     const char* slash1 = strrchr(filepath, '/');
     const char* slash2 = strrchr(filepath, '\\');
     const char* last_slash = (slash1 > slash2) ? slash1 : slash2;
 
     char* out_path = (char*)malloc(strlen(filepath) + 5);
     if (!out_path) {
-        fprintf(stderr, "Ошибка: не удалось выделить память.\n");
+        fprintf(stderr, "error: failed to allocate memory\n");
         exit(1);
     }
 
     if (last_slash) {
         int dir_len = last_slash - filepath + 1;
-        strncpy(out_path, filepath, dir_len);
+        srtncpy(out_path, filepath, dir_len);
         out_path[dir_len] = '\0';
         strcat(out_path, "out_");
         strcat(out_path, last_slash + 1);
@@ -26,60 +40,65 @@ char* generate_output_filename(const char* filepath) {
         strcpy(out_path, "out_");
         strcat(out_path, filepath);
     }
-
     return out_path;
-}
+} 
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     if (argc < 3) {
-        fprintf(stderr, "Использование: %s <флаг> <входной_файл> [выходной_файл]\n", argv[0]);
+        fprintf(stderr, "usage: %s <flag> <input_file> [output_file]\n", argv[0]);
         return 1;
     }
 
-    char* flag = argv[1];
+    char *flag = argv[1];
     if (flag[0] != '-' && flag[0] != '/') {
-        fprintf(stderr, "Ошибка: флаг должен начинаться с '-' или '/'.\n");
+        fprintf(stderr, "error: flag must start with '-' or '/'.\n");
         return 1;
     }
 
     bool has_n = false;
     char action = '\0';
 
-
     if (flag[1] == 'n') {
         has_n = true;
-        action = flag[2]; 
+        action = flag[2];
     } else {
-        action = flag[1]; 
+        action = flag[1];
     }
 
     if (has_n && argc != 4) {
-        fprintf(stderr, "Ошибка: при использовании флага с 'n' необходимо указать путь к выходному файлу.\n");
+        fprintf(stderr, "error: output file path is required when using a flag with 'n'.\n");
         return 1;
     }
     if (!has_n && argc != 3) {
-        fprintf(stderr, "Ошибка: слишком много аргументов для флага без 'n'.\n");
+        fprintf(stderr, "error: too many arguments for a flag without 'n'.\n");
         return 1;
     }
 
     if (action != 'd' && action != 'i' && action != 's' && action != 'a') {
-        fprintf(stderr, "Ошибка: неизвестное действие '%c'. Допустимые: d, i, s, a.\n", action);
+        fprintf(stderr, "error: unknown action '%c'. Allowed: d, i, s, a.\n", action);
         return 1;
     }
 
-    char* input_filepath = argv[2];
-    char* output_filepath = has_n ? argv[3] : generate_output_filename(input_filepath);
+    char *input_filepath = argv[2];
+    char *output_filepath = has_n ? argv[3] : generate_output_filename(input_filepath);
+
+    // ВЫЗОВ НАШЕЙ ГЛУБОКОЙ ПРОВЕРКИ
+    if (is_same_file(input_filepath, output_filepath)) {
+        fprintf(stderr, "error: input and output files point to the same physical file on disk. This will destroy data.\n");
+        if (!has_n) free(output_filepath);
+        return 1;
+    }
 
     FILE* in_file = fopen(input_filepath, "r");
     if (!in_file) {
-        fprintf(stderr, "Ошибка: не удалось открыть входной файл %s\n", input_filepath);
+        fprintf(stderr, "error: failed to open input file %s\n", input_filepath);
         if (!has_n) free(output_filepath);
         return 1;
     }
 
     FILE* out_file = fopen(output_filepath, "w");
     if (!out_file) {
-        fprintf(stderr, "Ошибка: не удалось создать выходной файл %s\n", output_filepath);
+        fprintf(stderr, "error: failed to create output file %s\n", output_filepath);
         fclose(in_file);
         if (!has_n) free(output_filepath);
         return 1;
@@ -88,7 +107,6 @@ int main(int argc, char* argv[]) {
     int c;
     int count = 0;
     bool line_started = false;
-
 
     while ((c = fgetc(in_file)) != EOF) {
         if (action == 'd') {
@@ -131,12 +149,12 @@ int main(int argc, char* argv[]) {
         fprintf(out_file, "%d\n", count);
     }
 
-    printf("Обработка завершена. Результат записан в: %s\n", output_filepath);
+    printf("Processing completed. Result saved to: %s\n", output_filepath);
 
     fclose(in_file);
     fclose(out_file);
     if (!has_n) {
-        free(output_filepath); 
+        free(output_filepath);
     }
 
     return 0;
