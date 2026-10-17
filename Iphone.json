@@ -1,0 +1,44 @@
+{
+    "model": "Iphone 15",
+    "brand": "Apple",
+    "color": ["pink", "black", "blue", "green", "yellow"],
+    "rate": 8,
+    "inStock": true,
+    "weight": 171,
+    "OS": "IOS 27",
+    "batery": 3349,
+    "screan": {
+        "diagonal": 6.1,
+        "resolution": [1179, 2556],
+        "type": "OLED",
+        "refreshRate": "60 Hz",
+        "pixelDensity": "460 pexels per inch",
+        "adaptiveRefreshRate": null,
+        "peakBrightness": 2000,
+        "peakHDRBrightness": 1600,
+        "HDR": true,
+        "timeResponse": "2 seconds"
+    },
+    "CPU": {
+        "chipset": "Apple A16 Bionic",
+        "CPUCosres": 6
+    },
+    "GPU": {
+        "grapfics": "5 core Apple GPU",
+        "GPUCores": 640
+    },
+    "memeory": [
+        {
+        "gigabytes": 128,
+        "price": 75990
+        },
+        {
+        "gigabytes": 256,
+        "price": 78990
+        },    
+        {
+        "gigabytes": 128,
+        "price": 92990
+        }
+    ]
+}
