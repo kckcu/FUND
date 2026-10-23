@@ -17,7 +17,7 @@ echo "      БЛОК 1: ВАЛИДНЫЕ ДАННЫЕ (Успешная рабо
 echo "======================================================"
 
 echo "[1.1] Тест флага -l (длина): 'HelloWorld'"
-$EXEC_FILE -l "HelloWorld"
+$EXEC_FILE -l "HelloWorld -valgrind" 
 
 echo -e "\n[1.2] Тест флага -r (реверс): '123456789'"
 $EXEC_FILE -r "123456789"
